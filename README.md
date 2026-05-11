@@ -4,8 +4,8 @@ Real-time RSS news monitoring pipeline using PySpark Structured Streaming,
 OpenAI LLM summarisation, and Streamlit.
 
 ## Team Members
-- Member 1
-- Member 2
+- Abdulrahman Salameh
+- Abdullah Damati
 
 ## Prerequisites
 
@@ -50,7 +50,7 @@ RSS Feeds ──► ingester.py ──► data/incoming/*.json
 
 ## Reflection (T5)
 
-At 1 000× input volume the top-words stateful aggregation would break first:
+At 1000× input volume the top-words stateful aggregation would break first:
 it maintains an unbounded in-memory hash map of every distinct token ever seen,
 so memory would explode. The fix is to switch from a complete-mode groupBy to a
 windowed aggregation with a watermark so Spark can evict old state, and to
