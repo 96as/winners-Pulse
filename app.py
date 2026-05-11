@@ -94,6 +94,11 @@ STOP_WORDS = {
 def start_streaming(_spark):
     """Launch the three streaming queries inside the Streamlit JVM
     so their memory sinks are queryable via spark.sql()."""
+    # Guard: skip if queries already running (e.g. after cache clear)
+    active = {q.name for q in _spark.streams.active}
+    if "by_source" in active:
+        return True
+
     stream = (
         _spark.readStream
         .schema(SCHEMA)
@@ -115,7 +120,7 @@ def start_streaming(_spark):
     # Q3 — top keywords
     stream.select(
         F.explode(
-            F.regexp_extract_all(F.lower(F.col("title")), F.lit(r"[a-z]{3,}"))
+            F.regexp_extract_all(F.lower(F.col("title")), F.lit(r"([a-z]{3,})"))
         ).alias("word")
     ).filter(~F.col("word").isin(STOP_WORDS)) \
      .filter(F.length("word") >= 3) \
@@ -194,7 +199,7 @@ df_words = safe_query(
     "SELECT word, count FROM top_words ORDER BY count DESC LIMIT 10"
 )
 if not df_words.empty:
-    st.dataframe(df_words, use_container_width=True, hide_index=True)
+    st.dataframe(df_words, width="stretch", hide_index=True)
 else:
     st.info("Waiting for data…")
 
@@ -238,7 +243,7 @@ with gdelt_col2:
             rss_batch = pd.DataFrame()
         joined = join_gdelt_rss(gdf, rss_batch)
         if not joined.empty:
-            st.dataframe(joined.head(15), use_container_width=True, hide_index=True)
+            st.dataframe(joined.head(15), width="stretch", hide_index=True)
         else:
             st.info("No overlapping entities found between GDELT and RSS headlines.")
     else:
@@ -253,7 +258,7 @@ if clusters_df is not None:
         with st.expander(f"Topic {topic_id}  ({len(subset)} headlines)", expanded=True):
             st.dataframe(
                 subset[["source", "title"]].head(10),
-                use_container_width=True, hide_index=True,
+                width="stretch", hide_index=True,
             )
 else:
     st.info("Not enough headlines yet for clustering — wait for more ingestion ticks.")

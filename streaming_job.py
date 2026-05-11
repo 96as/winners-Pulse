@@ -103,7 +103,7 @@ q_words = (
     stream
     .select(
         F.explode(
-            F.regexp_extract_all(F.lower(F.col("title")), F.lit(r"[a-z]{3,}"))
+            F.regexp_extract_all(F.lower(F.col("title")), F.lit(r"([a-z]{3,})"))
         ).alias("word")
     )
     .filter(~F.col("word").isin(STOP_WORDS))
