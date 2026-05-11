@@ -1,1 +1,16 @@
 .env
+
+# Runtime data produced by the ingester — never commit these
+data/incoming/
+
+# Spark checkpoints & metadata
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
